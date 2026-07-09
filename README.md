@@ -29,7 +29,7 @@ The standout feature of this system is its **Automated Scheduling Algorithm**. I
 
 ## Tech Stack
 
-* **Frontend:** HTML5, Vanilla JavaScript, Tailwind CSS (via CDN)
+* **Frontend:** HTML5, JavaScript, Tailwind CSS (via CDN)
 * **Backend:** Python, Flask
 * **Database:** PostgreSQL (Primary), Local CSV (Fallback)
 * **API:** RESTful JSON endpoints
