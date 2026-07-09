@@ -126,7 +126,7 @@ Once the app is running, open your browser and navigate to `http://localhost:500
 
 ---
 
-## 📡 API Endpoints Summary
+## API Endpoints Summary
 
 | Method | Endpoint | Description |
 | --- | --- | --- |
