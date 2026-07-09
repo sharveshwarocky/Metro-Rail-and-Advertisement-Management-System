@@ -1,15 +1,6 @@
 # Metro-Rail-and-Advertisement-Management-System
 
-
-Here is a complete, highly detailed `README.md` file designed to make your repository look professional, showcase your technical logic to recruiters, and provide foolproof instructions for anyone running the code.
-
-You can copy and paste this directly into your GitHub repository!
-
----
-
-# 🚇 Metro Rail Management System
-
-## 📖 Overview
+## Overview
 
 The **Metro Rail Management System** is a full-stack web application designed to streamline daily metro operations. It acts as an integrated hub to coordinate train schedules, track maintenance logs, and manage commercial advertisement campaigns.
 
@@ -17,7 +8,7 @@ The standout feature of this system is its **Automated Scheduling Algorithm**. I
 
 ---
 
-## ✨ Key Features
+## Key Features
 
 * **Dual-Backend Architecture:** * `app.py`: A robust, production-ready backend utilizing a **PostgreSQL** database.
 * `appy.py`: A lightweight, zero-setup backend that uses **local CSV files** for seamless testing and portability.
@@ -36,7 +27,7 @@ The standout feature of this system is its **Automated Scheduling Algorithm**. I
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 * **Frontend:** HTML5, Vanilla JavaScript, Tailwind CSS (via CDN)
 * **Backend:** Python, Flask
@@ -45,7 +36,7 @@ The standout feature of this system is its **Automated Scheduling Algorithm**. I
 
 ---
 
-## 🚀 Installation & Setup Guide
+## Installation & Setup Guide
 
 ### Prerequisites
 
@@ -149,7 +140,7 @@ Once the app is running, open your browser and navigate to `http://localhost:500
 
 ---
 
-## 🚧 System Limitations
+## System Limitations
 
 * **Optimization Window:** Schedules are generated for one fixed daily cycle (05:00 to 23:00); it does not currently support multi-day predictive scheduling.
 * **Manual Data Dependency:** The algorithm relies on admins accurately logging cleaning, maintenance, and ad contracts in real-time.
