@@ -91,7 +91,7 @@ python appy.py
 
 ---
 
-## 💻 How to Use the System (Showcase Guide)
+## How to Use the System (Showcase Guide)
 
 Once the app is running, open your browser and navigate to `http://localhost:5000`.
 
