@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metro Rail Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Simple modal styles */
+        .modal {
+            transition: opacity 0.25s ease;
+        }
+        .modal-active {
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+        body.modal-active {
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    
+    <div class="flex h-screen">
+        <div class="w-64 bg-gray-800 text-white p-6 flex flex-col">
+            <h1 class="text-2xl font-bold mb-8">Metro Admin</h1>
+            <nav class="flex-1">
+                <a href="#" class="nav-link block py-2.5 px-4 rounded transition duration-200 bg-gray-700" onclick="showSection('dashboard', this)">Dashboard</a>
+                <a href="#" class="nav-link block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700" onclick="showSection('trains', this)">Trains</a>
+                <a href="#" class="nav-link block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700" onclick="showSection('maintenance', this)">Maintenance</a>
+                <a href="#" class="nav-link block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700" onclick="showSection('ads', this)">Advertisements</a>
+                <a href="#" class="nav-link block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700" onclick="showSection('schedule', this)">Schedule</a>
+            </nav>
+        </div>
+
+        <main class="flex-1 p-10 overflow-auto">
+            
+            <section id="dashboard" class="content-section">
+                <h2 class="text-3xl font-bold mb-6">Dashboard</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-lg font-semibold text-gray-700">Total Trains</h3>
+                        <p id="total-trains" class="text-4xl font-bold text-blue-600">0</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-lg font-semibold text-gray-700">In Maintenance</h3>
+                        <p id="pending-maintenance" class="text-4xl font-bold text-red-600">0</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-lg font-semibold text-gray-700">Available for Service</h3>
+                        <p id="available-trains" class="text-4xl font-bold text-green-600">0</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="trains" class="content-section hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Manage Trains</h2>
+                    <button onclick="openModal('addTrainModal')" class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition">Add New Train</button>
+                </div>
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Number</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Home Location</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="trains-table-body" class="bg-white divide-y divide-gray-200">
+                            </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="maintenance" class="content-section hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">All Maintenance Records</h2>
+                    <button onclick="openModal('addMaintenanceModal')" class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition">Add Maintenance Record</button>
+                </div>
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Record ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Train ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Issue</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date Reported</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Severity</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="maintenance-table-body" class="bg-white divide-y divide-gray-200">
+                            </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="ads" class="content-section hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">All Ad Campaigns</h2>
+                    <button onclick="openModal('addAdModal')" class="bg-green-600 text-white px-4 py-2 rounded-lg shadow hover:bg-green-700 transition">Add Ad Campaign</button>
+                </div>
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ad ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Train ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Brand Name</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Start Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">End Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ads-table-body" class="bg-white divide-y divide-gray-200">
+                            </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="schedule" class="content-section hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Generate Base Depot Schedule</h2>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="generateSchedule()" class="bg-purple-600 text-white px-4 py-2 rounded-lg shadow hover:bg-purple-700 transition">Generate</button>
+                    </div>
+                </div>
+                
+                <div id="schedule-conflicts" class="mb-4 hidden">
+                    <h3 class="text-lg font-semibold text-yellow-800">Conflicts Logged</h3>
+                    <ul id="conflicts-list" class="list-disc list-inside bg-yellow-100 border border-yellow-300 text-yellow-700 p-4 rounded-md"></ul>
+                </div>
+
+                <div id="schedule-frequency" class="mb-4 hidden">
+                    <p class="text-lg text-gray-700">Calculated train frequency: <span id="frequency-value" class="font-bold text-blue-600"></span> minutes</p>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Train Number</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Train ID</th>
+                            </tr>
+                        </thead>
+                        <tbody id="schedule-table-body" class="bg-white divide-y divide-gray-200">
+                            <tr><td colspan="3" class="px-6 py-4 text-center text-gray-500">Generate a schedule to see results.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <div id="addTrainModal" class="modal-container modal fixed w-full h-full top-0 left-0 flex items-center justify-center hidden z-50" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-content bg-white p-8 rounded-lg shadow-2xl w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-2xl font-bold">Add New Train</h3>
+                <button class="text-gray-400 hover:text-gray-600 text-3xl" onclick="closeModal('addTrainModal')">&times;</button>
+            </div>
+            <form id="addTrainForm">
+                <div class="mb-4">
+                    <label for="train_number" class="block text-sm font-medium text-gray-700">Train Number</label>
+                    <input type="text" id="train_number" name="train_number" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                </div>
+                <div class="mb-6">
+                    <label for="home_location" class="block text-sm font-medium text-gray-700">Home Location</label>
+                    <input type="text" id="home_location" name="home_location" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                </div>
+                <div class="flex justify-end space-x-4">
+                    <button type="button" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300" onclick="closeModal('addTrainModal')">Cancel</button>
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Add Train</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div id="addMaintenanceModal" class="modal-container modal fixed w-full h-full top-0 left-0 flex items-center justify-center hidden z-50" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-content bg-white p-8 rounded-lg shadow-2xl w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-2xl font-bold">Add Maintenance Record</h3>
+                <button class="text-gray-400 hover:text-gray-600 text-3xl" onclick="closeModal('addMaintenanceModal')">&times;</button>
+            </div>
+            <form id="addMaintenanceForm">
+                <div class="mb-4">
+                    <label for="m_train_id" class="block text-sm font-medium text-gray-700">Train</label>
+                    <select id="m_train_id" name="train_id" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                        <option value="" disabled selected>Select a train</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="issue" class="block text-sm font-medium text-gray-700">Issue Description</label>
+                    <input type="text" id="issue" name="issue" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                </div>
+                <div class="mb-6">
+                    <label for="severity" class="block text-sm font-medium text-gray-700">Severity (1-10)</label>
+                    <input type="number" id="severity" name="severity" min="1" max="10" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                </div>
+                <div class="flex justify-end space-x-4">
+                    <button type="button" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300" onclick="closeModal('addMaintenanceModal')">Cancel</button>
+                    <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">Log Issue</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div id="addAdModal" class="modal-container modal fixed w-full h-full top-0 left-0 flex items-center justify-center hidden z-50" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-content bg-white p-8 rounded-lg shadow-2xl w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-2xl font-bold">Add Ad Campaign</h3>
+                <button class="text-gray-400 hover:text-gray-600 text-3xl" onclick="closeModal('addAdModal')">&times;</button>
+            </div>
+            <form id="addAdForm">
+                <div class="mb-4">
+                    <label for="ad_train_id" class="block text-sm font-medium text-gray-700">Train</label>
+                    <select id="ad_train_id" name="train_id" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                        <option value="" disabled selected>Select a train</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="brand_name" class="block text-sm font-medium text-gray-700">Brand Name</label>
+                    <input type="text" id="brand_name" name="brand_name" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                </div>
+                <div class="mb-4">
+                    <label for="start_date" class="block text-sm font-medium text-gray-700">Start Date</label>
+                    <input type="date" id="start_date" name="start_date" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                </div>
+                <div class="mb-4">
+                    <label for="end_date" class="block text-sm font-medium text-gray-700">End Date</label>
+                    <input type="date" id="end_date" name="end_date" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                </div>
+                <div class="mb-6">
+                    <label for="priority" class="block text-sm font-medium text-gray-700">Priority</label>
+                    <select id="priority" name="priority" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                        <option value="1">Low</option>
+                        <option value="2" selected>Medium</option>
+                        <option value="3">High</option>
+                    </select>
+                </div>
+                <div class="flex justify-end space-x-4">
+                    <button type="button" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300" onclick="closeModal('addAdModal')">Cancel</button>
+                    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">Add Campaign</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div id="trainHistoryModal" class="modal-container modal fixed w-full h-full top-0 left-0 flex items-center justify-center hidden z-50" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-content bg-white p-8 rounded-lg shadow-2xl w-full max-w-3xl max-h-[80vh] overflow-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="history-modal-title" class="text-2xl font-bold">Train History</h3>
+                <button class="text-gray-400 hover:text-gray-600 text-3xl" onclick="closeModal('trainHistoryModal')">&times;</button>
+            </div>
+            <div id="history-modal-content" class="space-y-6">
+                </div>
+        </div>
+    </div>
+
+
+    <script>
+        // --- 2. NAVIGATION ---
+        function showSection(sectionId, element) {
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('bg-gray-700');
+                link.classList.add('hover:bg-gray-700');
+            });
+            element.classList.add('bg-gray-700');
+            element.classList.remove('hover:bg-gray-700');
+            
+            if (sectionId === 'dashboard') loadDashboardData();
+            if (sectionId === 'trains') loadTrains();
+            if (sectionId === 'maintenance') loadMaintenance(); 
+            if (sectionId === 'ads') loadAds(); 
+        }
+
+        // --- 3. MODAL (POP-UP) CONTROL ---
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.add('modal-active'), 10); 
+            document.body.classList.add('modal-active');
+            
+            if (modalId === 'addMaintenanceModal' || modalId === 'addAdModal') {
+                loadTrainsForDropdowns();
+            }
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.remove('modal-active');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+            document.body.classList.remove('modal-active');
+        }
+
+        // --- 4. API CALLS & DATA LOADING ---
+        function loadTrains() {
+            fetch('/api/trains') 
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to fetch trains');
+                    return response.json();
+                })
+                .then(trains => {
+                    const tableBody = document.getElementById('trains-table-body');
+                    tableBody.innerHTML = ''; 
+                    if (trains.length === 0) {
+                        tableBody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">No trains found. Add one!</td></tr>';
+                        return;
+                    }
+                    trains.forEach(train => {
+                        let statusColor = train.status === 'Available' ? 'text-green-600' : 'text-red-600';
+                        const row = `
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${train.train_id}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${train.train_number}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${train.home_location}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold ${statusColor}">${train.status}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                                    <button onclick="showTrainHistory(${train.train_id})" class="text-indigo-600 hover:text-indigo-900">History</button>
+                                    <button onclick="deleteTrain(${train.train_id})" class="text-red-600 hover:text-red-900 font-semibold">Remove</button>
+                                </td>
+                            </tr>
+                        `;
+                        tableBody.innerHTML += row;
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading trains:', error);
+                    document.getElementById('trains-table-body').innerHTML = `<tr><td colspan="5" class="px-6 py-4 text-center text-red-500">Error: ${error.message}</td></tr>`;
+                });
+        }
+        
+        function loadMaintenance() {
+            fetch('/api/maintenance') 
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to fetch maintenance records');
+                    return response.json();
+                })
+                .then(records => {
+                    const tableBody = document.getElementById('maintenance-table-body');
+                    tableBody.innerHTML = ''; 
+                    if (records.length === 0) {
+                        tableBody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">No maintenance records found.</td></tr>';
+                        return;
+                    }
+                    records.forEach(record => {
+                        let sevColor = record.severity >= 7 ? 'text-red-600' : (record.severity >= 4 ? 'text-yellow-600' : 'text-green-600');
+                        const row = `
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${record.record_id}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${record.train_id}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${record.issue}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${record.date_reported}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold ${sevColor}">${record.severity}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${record.status}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <button onclick="deleteMaintenance(${record.record_id})" class="text-red-600 hover:text-red-900 font-semibold">Remove</button>
+                                </td>
+                            </tr>
+                        `;
+                        tableBody.innerHTML += row;
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading maintenance:', error);
+                    document.getElementById('maintenance-table-body').innerHTML = `<tr><td colspan="7" class="px-6 py-4 text-center text-red-500">Error: ${error.message}</td></tr>`;
+                });
+        }
+        
+        // *** MODIFIED FUNCTION (Fix 2/3) ***
+        function loadAds() {
+            fetch('/api/ads') 
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to fetch ad campaigns');
+                    return response.json();
+                })
+                .then(ads => {
+                    const tableBody = document.getElementById('ads-table-body');
+                    tableBody.innerHTML = ''; 
+                    
+                    // --- Maps to translate '1', '2', '3' ---
+                    const priorityMap = { '1': 'Low', '2': 'Medium', '3': 'High' };
+                    const priorityColorMap = {
+                        '1': 'text-green-600', // Low
+                        '2': 'text-yellow-600', // Medium
+                        '3': 'text-red-600'  // High
+                    };
+                    // ----------------------------------------
+
+                    if (ads.length === 0) {
+                        tableBody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">No ad campaigns found.</td></tr>';
+                        return;
+                    }
+                    ads.forEach(ad => {
+                        // Use the maps
+                        const priorityText = priorityMap[ad.priority] || ad.priority;
+                        const priColor = priorityColorMap[ad.priority] || 'text-gray-500';
+
+                        const row = `
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${ad.ad_id}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${ad.train_id}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${ad.brand_name}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${ad.start_date}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${ad.end_date}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold ${priColor}">${priorityText}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <button onclick="deleteAd(${ad.ad_id})" class="text-red-600 hover:text-red-900 font-semibold">Remove</button>
+                                </td>
+                            </tr>
+                        `;
+                        tableBody.innerHTML += row;
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading ads:', error);
+                    document.getElementById('ads-table-body').innerHTML = `<tr><td colspan="7" class="px-6 py-4 text-center text-red-500">Error: ${error.message}</td></tr>`;
+                });
+        }
+        // *************************************
+        
+        function loadTrainsForDropdowns() {
+            fetch('/api/trains') 
+                .then(response => response.json())
+                .then(trains => {
+                    const mSelect = document.getElementById('m_train_id');
+                    const adSelect = document.getElementById('ad_train_id');
+                    mSelect.innerHTML = '<option value="" disabled selected>Select a train</option>';
+                    adSelect.innerHTML = '<option value="" disabled selected>Select a train</option>';
+                    trains.forEach(train => {
+                        const option = `<option value="${train.train_id}">ID: ${train.train_id} (${train.train_number})</option>`;
+                        if (train.status === 'Available') {
+                             mSelect.innerHTML += option;
+                        }
+                        adSelect.innerHTML += option; // Can add ads even if train is in maintenance
+                    });
+                })
+                .catch(error => console.error('Could not load trains for dropdowns:', error));
+        }
+
+        function loadDashboardData() {
+            fetch('/api/trains') 
+                .then(response => response.json())
+                .then(trains => {
+                    let inMaintenance = 0;
+                    let available = 0;
+                    trains.forEach(t => {
+                        if (t.status === 'In-Maintenance') inMaintenance++;
+                        else available++;
+                    });
+                    document.getElementById('total-trains').textContent = trains.length;
+                    document.getElementById('pending-maintenance').textContent = inMaintenance;
+                    document.getElementById('available-trains').textContent = available;
+                })
+                .catch(error => {
+                    console.error('Failed to load dashboard data:', error);
+                    document.getElementById('total-trains').textContent = 'N/A';
+                    document.getElementById('pending-maintenance').textContent = 'N/A';
+                    document.getElementById('available-trains').textContent = 'N/A';
+                });
+        }
+        
+        // *** MODIFIED FUNCTION (Fix 3/3) ***
+        function showTrainHistory(trainId) {
+            fetch(`/api/trains/${trainId}/history`) 
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('history-modal-title').textContent = `History for Train ${data.details.train_number} (ID: ${data.details.train_id})`;
+                    let statusColor = data.details.status === 'Available' ? 'text-green-600' : 'text-red-600';
+                    let content = `<p><strong>Status:</strong> <span class="font-bold ${statusColor}">${data.details.status}</span></p>`;
+                    
+                    content += '<h4 class="text-lg font-bold mt-4 border-b pb-1">Maintenance Records</h4>';
+                    if (data.maintenance.length > 0) {
+                        content += '<ul class="list-disc list-inside space-y-1">';
+                        data.maintenance.forEach(m => {
+                            let sevColor = m.severity >= 7 ? 'text-red-600' : (m.severity >= 4 ? 'text-yellow-600' : 'text-green-600');
+                            content += `<li>[${m.date_reported}] ${m.issue} (<span class="font-bold ${sevColor}">Severity: ${m.severity}</span>, Status: ${m.status})</li>`;
+                        });
+                        content += '</ul>';
+                    } else content += '<p class="text-gray-500">No maintenance records found.</p>';
+                    
+                    content += '<h4 class="text-lg font-bold mt-4 border-b pb-1">Ad Campaigns</h4>';
+
+                    // --- Maps to translate '1', '2', '3' ---
+                    const priorityMap = { '1': 'Low', '2': 'Medium', '3': 'High' };
+                    const priorityColorMap = {
+                        '1': 'text-green-600', // Low
+                        '2': 'text-yellow-600', // Medium
+                        '3': 'text-red-600'  // High
+                    };
+                    // ----------------------------------------
+
+                    if (data.advertisements.length > 0) {
+                        content += '<ul class="list-disc list-inside space-y-1">';
+                        data.advertisements.forEach(ad => {
+                            // Use the maps
+                            const priorityText = priorityMap[ad.priority] || ad.priority;
+                            const priColor = priorityColorMap[ad.priority] || 'text-gray-500';
+                            
+                            content += `<li>${ad.brand_name} (${ad.start_date} to ${ad.end_date}, <span class="font-bold ${priColor}">Priority: ${priorityText}</span>)</li>`;
+                        });
+                        content += '</ul>';
+                    } else content += '<p class="text-gray-500">No ad campaigns found.</p>';
+                    // **********************************
+                    
+                    document.getElementById('history-modal-content').innerHTML = content;
+                    openModal('trainHistoryModal');
+                })
+                .catch(error => {
+                    console.error('Failed to load history:', error);
+                    alert(`Error: ${error.message}`);
+                });
+        }
+        // *************************************
+
+        function generateSchedule() {
+            fetch('/api/schedule/generate', { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                const conflictsList = document.getElementById('conflicts-list');
+                const conflictsDiv = document.getElementById('schedule-conflicts');
+                if (data.conflicts && data.conflicts.length > 0) {
+                    conflictsList.innerHTML = data.conflicts.map(c => `<li>${c}</li>`).join('');
+                    conflictsDiv.classList.remove('hidden');
+                } else conflictsDiv.classList.add('hidden');
+                
+                const freqDiv = document.getElementById('schedule-frequency');
+                if (data.frequency) {
+                    document.getElementById('frequency-value').textContent = data.frequency;
+                    freqDiv.classList.remove('hidden');
+                } else freqDiv.classList.add('hidden');
+
+                const scheduleBody = document.getElementById('schedule-table-body');
+                scheduleBody.innerHTML = '';
+                if (data.schedule && data.schedule.length > 0) {
+                    data.schedule.forEach(s => {
+                        scheduleBody.innerHTML += `
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${s.time}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${s.train_number}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${s.train_id}</td>
+                            </tr>
+                        `;
+                    });
+                } else scheduleBody.innerHTML = '<tr><td colspan="3" class="px-6 py-4 text-center text-gray-500">No trains available.</td></tr>';
+            })
+            .catch(error => {
+                console.error('Failed to generate schedule:', error)
+                document.getElementById('schedule-table-body').innerHTML = `<tr><td colspan="3" class="px-6 py-4 text-center text-red-500">Error: ${error.message}</td></tr>`;
+            });
+        }
+
+        // --- 5. FORM SUBMISSIONS ---
+        document.getElementById('addTrainForm').addEventListener('submit', function(e) {
+            e.preventDefault(); 
+            const data = {
+                train_number: document.getElementById('train_number').value,
+                home_location: document.getElementById('home_location').value
+            };
+            fetch('/api/trains/add', { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to add train');
+                closeModal('addTrainModal');
+                e.target.reset(); 
+                loadTrains();
+                loadDashboardData();
+            })
+            .catch(err => alert(err.message));
+        });
+        
+        document.getElementById('addMaintenanceForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const data = {
+                train_id: document.getElementById('m_train_id').value,
+                issue: document.getElementById('issue').value,
+                severity: document.getElementById('severity').value
+            };
+            fetch('/api/maintenance/add', { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to add maintenance record');
+                closeModal('addMaintenanceModal');
+                e.target.reset();
+                loadDashboardData();
+                loadTrains(); // Reload trains in case status changed
+                loadMaintenance(); // Refresh maintenance table
+            })
+            .catch(err => alert(err.message));
+        });
+        
+        document.getElementById('addAdForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const data = {
+                train_id: document.getElementById('ad_train_id').value,
+                brand_name: document.getElementById('brand_name').value,
+                start_date: document.getElementById('start_date').value,
+                end_date: document.getElementById('end_date').value,
+                priority: document.getElementById('priority').value
+            };
+            fetch('/api/ads/add', { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to add ad campaign');
+                closeModal('addAdModal');
+                e.target.reset();
+                loadAds(); // Refresh ads table
+            })
+            .catch(err => alert(err.message));
+        });
+
+        // --- 6. DELETE FUNCTIONS ---
+        // *** NEW FUNCTION ***
+        function deleteTrain(trainId) {
+            // Using confirm() for simplicity, replace with a custom modal in a real app
+            if (confirm(`Are you sure you want to remove train ID ${trainId}? This will also remove its maintenance and ad records.`)) {
+                fetch(`/api/trains/delete/${trainId}`, { method: 'DELETE' })
+                .then(res => {
+                    if (!res.ok) throw new Error('Failed to delete train');
+                    return res.json();
+                })
+                .then(data => {
+                    if(data.success) {
+                        loadTrains(); // Refresh the table
+                        loadDashboardData(); // Update dashboard counts
+                    } else {
+                        alert(data.message || 'Could not delete train.');
+                    }
+                })
+                .catch(err => alert(err.message));
+            }
+        }
+
+        // *** NEW FUNCTION ***
+        function deleteMaintenance(recordId) {
+            if (confirm(`Are you sure you want to remove maintenance record ID ${recordId}?`)) {
+                fetch(`/api/maintenance/delete/${recordId}`, { method: 'DELETE' })
+                .then(res => {
+                     if (!res.ok) throw new Error('Failed to delete maintenance record');
+                     return res.json();
+                })
+                .then(data => {
+                     if(data.success) {
+                        loadMaintenance(); // Refresh this table
+                        loadTrains(); // Refresh trains in case status changed
+                        loadDashboardData(); // Update counts
+                    } else {
+                        alert(data.message || 'Could not delete maintenance record.');
+                    }
+                })
+                .catch(err => alert(err.message));
+            }
+        }
+
+        // *** NEW FUNCTION ***
+        function deleteAd(adId) {
+            if (confirm(`Are you sure you want to remove ad campaign ID ${adId}?`)) {
+                fetch(`/api/ads/delete/${adId}`, { method: 'DELETE' })
+                .then(res => {
+                    if (!res.ok) throw new Error('Failed to delete ad campaign');
+                     return res.json();
+                })
+                 .then(data => {
+                     if(data.success) {
+                        loadAds(); // Refresh this table
+                    } else {
+                        alert(data.message || 'Could not delete ad campaign.');
+                    }
+                 })
+                .catch(err => alert(err.message));
+            }
+        }
+
+
+        // --- 7. INITIAL PAGE LOAD ---
+        document.addEventListener('DOMContentLoaded', function() {
+            const firstNavLink = document.querySelector('.nav-link');
+            showSection('dashboard', firstNavLink);
+        });
+    </script>
+</body>
+</html>
